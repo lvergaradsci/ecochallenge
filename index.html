@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoChallenge — Gestión Ambiental 🌿</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<!-- ===================== CONFIG ===================== -->
+<div id="screen-config" class="screen active">
+  <div class="intro-bg-gradient"></div>
+  <div class="config-content">
+    <div class="eco-badge">⚙️ CONFIGURACIÓN INICIAL</div>
+    <h1 class="title-main" style="font-size:clamp(2.2rem,7vw,3.5rem)">Conectar<br><span class="accent">Google Sheets</span></h1>
+    <p class="subtitle">Pega la URL de tu Google Apps Script para guardar puntos en la nube.</p>
+    <div class="config-form">
+      <div class="form-group">
+        <label>URL del Web App (Google Apps Script)</label>
+        <input type="url" id="config-url" placeholder="https://script.google.com/macros/s/AKfy.../exec">
+      </div>
+      <div class="config-tip">
+        <strong>¿No tienes la URL aún?</strong> Sigue el archivo <code>GUIA_SETUP.md</code> incluido. Toma ~15 minutos y es gratis.
+      </div>
+      <button class="btn-primary" onclick="saveConfig()">✅ Guardar y Continuar</button>
+      <button class="btn-secondary" onclick="skipConfig()">🎮 Modo local (sin nube)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== INTRO ===================== -->
+<div id="screen-intro" class="screen">
+  <div class="intro-bg-gradient"></div>
+  <div class="intro-content">
+    <div class="cloud-status" id="cloud-status">
+      <span class="status-dot offline" id="status-dot"></span>
+      <span id="status-text">Verificando conexión...</span>
+    </div>
+    <div class="eco-badge">🌱 GESTIÓN AMBIENTAL · UNICÓRDOBA</div>
+    <h1 class="title-main">ECO<span class="accent">CHALLENGE</span></h1>
+    <p class="subtitle">Un duelo de conocimiento sobre contaminación ambiental.<br>¿Estás listo para demostrar lo que sabes?</p>
+    <div class="presenters-note">
+      <span>Expositores (no evaluados):</span>
+      <strong>Luis Vergara · Xiara Sarge · Jaider Vergara · Mateo Mercado</strong>
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="goToPlayerSelect()">⚡ Seleccionar mi perfil</button>
+      <button class="btn-secondary" onclick="goToScreen('screen-leaderboard'); loadLeaderboard()">🏆 Tabla de puntajes</button>
+      <button class="btn-secondary" onclick="goToScreen('screen-admin'); renderAdminQuestions()">🔧 Panel de control</button>
+    </div>
+    <div class="prof-badge">Clase de la prof. <strong>Galia Alarcón</strong> · <button class="link-btn" onclick="changeConfig()">Cambiar config</button></div>
+  </div>
+</div>
+
+<!-- ===================== SELECCIONAR PERFIL ===================== -->
+<div id="screen-player-select" class="screen">
+  <div class="screen-header">
+    <button class="btn-back" onclick="goToScreen('screen-intro')">← Volver</button>
+    <h2>¿Quién eres?</h2>
+  </div>
+  <div class="setup-content">
+    <p class="setup-hint">Selecciona tu nombre. Tus puntos se guardarán automáticamente en Google Sheets.</p>
+    <div class="players-grid" id="players-grid-select"></div>
+    <div class="selected-preview" id="selected-preview" style="display:none">
+      <div class="preview-card" id="preview-card"></div>
+      <button class="btn-primary" onclick="startAsPlayer()">🚀 ¡Jugar!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PREGUNTA ===================== -->
+<div id="screen-question" class="screen">
+  <div class="game-hud">
+    <div class="hud-left">
+      <span class="hud-label">PREGUNTA</span>
+      <span class="hud-value" id="hud-qnum">1/25</span>
+    </div>
+    <div class="hud-center">
+      <div class="timer-ring">
+        <svg viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="26" class="timer-bg"/>
+          <circle cx="30" cy="30" r="26" class="timer-fill" id="timer-circle"/>
+        </svg>
+        <span class="timer-text" id="timer-text">15</span>
+      </div>
+    </div>
+    <div class="hud-right">
+      <span class="hud-label">MIS PUNTOS</span>
+      <span class="hud-value" id="hud-points">0</span>
+    </div>
+  </div>
+
+  <div class="player-banner" id="player-banner"></div>
+
+  <div class="question-container">
+    <div class="question-category" id="q-category"></div>
+    <div class="question-difficulty" id="q-difficulty"></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="question-points-badge" id="q-points"></div>
+  </div>
+
+  <div class="answers-grid" id="answers-grid"></div>
+
+  <div class="game-footer">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RESULTADO ===================== -->
+<div id="screen-result" class="screen">
+  <div class="result-container">
+    <div class="result-emoji" id="result-emoji">✅</div>
+    <div class="result-title" id="result-title">¡CORRECTO!</div>
+    <div class="result-explanation" id="result-explanation"></div>
+    <div class="result-points" id="result-points" style="display:none"></div>
+    <div class="penalty-zone" id="penalty-zone" style="display:none">
+      <div class="penalty-title">🎲 TU PENITENCIA</div>
+      <div class="penalty-text" id="penalty-text"></div>
+    </div>
+    <div class="sync-status" id="sync-status" style="display:none">
+      <span class="sync-icon">☁️</span> <span id="sync-msg">Guardando en Sheets...</span>
+    </div>
+    <div class="result-actions">
+      <button class="btn-primary" onclick="nextQuestion()">Siguiente →</button>
+      <button class="btn-secondary" onclick="goToScreen('screen-leaderboard'); loadLeaderboard()">📊 Ver tabla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LEADERBOARD ===================== -->
+<div id="screen-leaderboard" class="screen">
+  <div class="screen-header">
+    <button class="btn-back" onclick="goToScreen('screen-intro')">← Inicio</button>
+    <h2>🏆 Tabla de Puntajes</h2>
+    <button class="btn-secondary small" onclick="loadLeaderboard()">🔄</button>
+  </div>
+  <div class="leaderboard-content">
+    <div class="leaderboard-list" id="leaderboard-list">
+      <div class="loading-state">⏳ Cargando...</div>
+    </div>
+    <div class="leaderboard-footer">
+      <p class="leaderboard-hint">Se sincroniza con Google Sheets automáticamente.</p>
+      <button class="btn-secondary small" onclick="exportLeaderboard()">📥 Descargar Excel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN ===================== -->
+<div id="screen-admin" class="screen">
+  <div class="screen-header">
+    <button class="btn-back" onclick="goToScreen('screen-intro')">← Volver</button>
+    <h2>🔧 Panel de Control</h2>
+  </div>
+  <div class="admin-content">
+    <div class="admin-tabs">
+      <button class="tab active" onclick="switchTab('tab-questions', this)">Preguntas</button>
+      <button class="tab" onclick="switchTab('tab-penalties', this)">Penitencias</button>
+      <button class="tab" onclick="switchTab('tab-players', this)">Jugadores</button>
+      <button class="tab" onclick="switchTab('tab-danger', this)">⚠️ Reset</button>
+    </div>
+    <div id="tab-questions" class="tab-content active">
+      <div class="admin-actions">
+        <button class="btn-add" onclick="addQuestion()">+ Nueva Pregunta</button>
+        <button class="btn-secondary small" onclick="exportData()">💾 Exportar JSON</button>
+        <label class="btn-secondary small" style="cursor:pointer">📂 Importar<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+      </div>
+      <div class="questions-list" id="questions-list"></div>
+    </div>
+    <div id="tab-penalties" class="tab-content">
+      <div class="admin-actions"><button class="btn-add" onclick="addPenalty()">+ Nueva Penitencia</button></div>
+      <div class="penalties-list" id="penalties-list"></div>
+    </div>
+    <div id="tab-players" class="tab-content">
+      <div class="admin-actions"><button class="btn-add" onclick="addPlayer()">+ Agregar Jugador</button></div>
+      <div class="players-admin-list" id="players-admin-list"></div>
+    </div>
+    <div id="tab-danger" class="tab-content">
+      <div class="danger-zone">
+        <h3>⚠️ Zona de peligro</h3>
+        <p style="color:var(--text2);margin:0.5rem 0 1.5rem;font-size:0.9rem">Estas acciones son irreversibles. Úsalas antes de una nueva sesión.</p>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <button class="btn-danger-full" onclick="resetAllScores()">🗑️ Borrar TODOS los puntajes en Google Sheets</button>
+          <button class="btn-secondary" onclick="resetLocalProgress()">🔄 Reiniciar mi progreso local</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL PREGUNTA ===================== -->
+<div id="modal-question" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <h3 id="modal-q-title">Editar Pregunta</h3>
+    <div class="form-group"><label>Pregunta</label><textarea id="modal-q-text" rows="3"></textarea></div>
+    <div class="form-group">
+      <label>Categoría</label>
+      <select id="modal-q-cat">
+        <option value="🌬️ Atmósfera">🌬️ Atmósfera</option>
+        <option value="💧 Agua">💧 Agua</option>
+        <option value="🌱 Suelo">🌱 Suelo</option>
+        <option value="🏭 Tratamiento">🏭 Tratamiento</option>
+        <option value="🔬 Conceptos">🔬 Conceptos</option>
+        <option value="⚡ Reto">⚡ Reto Especial</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Dificultad</label>
+      <select id="modal-q-diff">
+        <option value="1">★☆☆ Fácil (+50 pts)</option>
+        <option value="2">★★☆ Media (+100 pts)</option>
+        <option value="3">★★★ Difícil (+200 pts)</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Respuesta correcta</label><input type="text" id="modal-q-correct"></div>
+    <div class="form-group"><label>Opciones incorrectas (una por línea)</label><textarea id="modal-q-wrong" rows="3"></textarea></div>
+    <div class="form-group"><label>Explicación</label><textarea id="modal-q-explain" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveQuestion()">Guardar</button>
+      <button class="btn-secondary" onclick="closeModal('modal-question')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="celebration" class="celebration" style="display:none"></div>
+
+<script src="data.js"></script>
+<script src="sheets.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
