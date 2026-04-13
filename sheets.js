@@ -5,7 +5,7 @@
 const Sheets = (() => {
 
   function getUrl() {
-    return localStorage.getItem('eco_sheets_url') || '';
+    return "https://script.google.com/macros/s/AKfycbxVTQlIJXbvmMM1Rjau77bqvdFTK9-nDKMhduZvcF-hrLTS8FdE11CauhCLu0zV6WG-/exec";
   }
 
   function isConnected() {
@@ -14,7 +14,7 @@ const Sheets = (() => {
 
   // ---- Llamada genérica a la API ----
   async function call(params) {
-    const url = getUrl("https://script.google.com/macros/s/AKfycbxVTQlIJXbvmMM1Rjau77bqvdFTK9-nDKMhduZvcF-hrLTS8FdE11CauhCLu0zV6WG-/exec");
+    const url = getUrl();
     if (!url) return { error: 'Sin URL configurada' };
 
     const qs = new URLSearchParams(params).toString();
@@ -89,6 +89,8 @@ function skipConfig() {
 
 function changeConfig() {
   document.getElementById('config-url').value = Sheets.getUrl();
+
+  
   goToScreen('screen-config');
 }
 
