@@ -5,8 +5,8 @@
 const Sheets = (() => {
 
   function getUrl() {
-    return "https://script.google.com/macros/s/AKfycbxVTQlIJXbvmMM1Rjau77bqvdFTK9-nDKMhduZvcF-hrLTS8FdE11CauhCLu0zV6WG-/exec";
-            https://script.google.com/macros/s/AKfycbxVTQlIJXbvmMM1Rjau77bqvdFTK9-nDKMhduZvcF-hrLTS8FdE11CauhCLu0zV6WG-/exec
+    return "https://script.google.com/macros/s/AKfycbwJWyH85qGCb5mcIsTqyvUFW-c0_uxHBsRVYZi5SRWGTrBX4TstSPnEWMvNHCAynl3H/exec";
+            
   }
 
   function isConnected() {
