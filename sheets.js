@@ -91,7 +91,7 @@ function changeConfig() {
   document.getElementById('config-url').value = Sheets.getUrl();
 
   
-  goToScreen('screen-config');
+  //goToScreen('screen-config');
 }
 
 async function checkConnection() {
