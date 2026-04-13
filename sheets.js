@@ -14,7 +14,7 @@ const Sheets = (() => {
 
   // ---- Llamada genérica a la API ----
   async function call(params) {
-    const url = getUrl();
+    const url = getUrl("https://script.google.com/macros/s/AKfycbxVTQlIJXbvmMM1Rjau77bqvdFTK9-nDKMhduZvcF-hrLTS8FdE11CauhCLu0zV6WG-/exec");
     if (!url) return { error: 'Sin URL configurada' };
 
     const qs = new URLSearchParams(params).toString();
