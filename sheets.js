@@ -5,7 +5,7 @@
 const Sheets = (() => {
 
   function getUrl() {
-    return "https://script.google.com/macros/s/AKfycbwJWyH85qGCb5mcIsTqyvUFW-c0_uxHBsRVYZi5SRWGTrBX4TstSPnEWMvNHCAynl3H/exec";
+    return "https://script.google.com/macros/s/AKfycbzZ2XNwD7cYkDpoc4SPfs1xQwkYZGQ6K0SaaiVqfytmXThXuIimpueiJvmdNxh5gvbu/exec";
             
   }
 
