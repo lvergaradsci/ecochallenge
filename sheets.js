@@ -6,6 +6,7 @@ const Sheets = (() => {
 
   function getUrl() {
     return "https://script.google.com/macros/s/AKfycbxVTQlIJXbvmMM1Rjau77bqvdFTK9-nDKMhduZvcF-hrLTS8FdE11CauhCLu0zV6WG-/exec";
+            https://script.google.com/macros/s/AKfycbxVTQlIJXbvmMM1Rjau77bqvdFTK9-nDKMhduZvcF-hrLTS8FdE11CauhCLu0zV6WG-/exec
   }
 
   function isConnected() {
@@ -258,3 +259,7 @@ function saveScoreLocally(player, points, correct) {
   }
   localStorage.setItem('eco_local_scores', JSON.stringify(scores));
 }
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('App iniciada 🚀');
+  checkConnection();
+});
