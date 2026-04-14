@@ -101,6 +101,10 @@ function selectPlayerChip(chip, player) {
 async function startAsPlayer() {
   if (!gameState.currentPlayer) { showToast('Selecciona tu perfil primero', 'warning'); return; }
 
+  // Inicializar audio en el primer gesto del usuario (requerido por navegadores)
+  SoundEngine.init();
+  SoundEngine.playClick();
+
   if (Sheets.isConnected()) {
     await Sheets.registerPlayer(gameState.currentPlayer);
     showToast('☁️ Conectado a Google Sheets');
@@ -153,7 +157,9 @@ function renderQuestion() {
   });
 
   gameState.answered = false;
-  startTimer(DIFFICULTY_TIME[q.difficulty], () => onTimeout(q));
+  const timerSecs = DIFFICULTY_TIME[q.difficulty];
+  startTimer(timerSecs, () => onTimeout(q));
+  SoundEngine.startTimerSound(timerSecs);
 }
 
 // =========================================================
@@ -163,6 +169,7 @@ function selectAnswer(btn, q) {
   if (gameState.answered) return;
   gameState.answered = true;
   clearTimer();
+  SoundEngine.stopTimerSound();
 
   const all = document.querySelectorAll('.answer-btn');
   all.forEach(b => b.disabled = true);
@@ -171,6 +178,13 @@ function selectAnswer(btn, q) {
     if (b.dataset.correct === 'true') b.classList.add('correct');
     else if (b === btn && !isCorrect) b.classList.add('incorrect');
   });
+
+  // Sonido inmediato al responder
+  if (isCorrect) {
+    SoundEngine.playCorrect();
+  } else {
+    SoundEngine.playWrong();
+  }
 
   const timeBonus = isCorrect ? Math.max(0, Math.floor(gameState.timeLeft * 2)) : 0;
   const basePts   = isCorrect ? DIFFICULTY_POINTS[q.difficulty] : 0;
@@ -183,6 +197,8 @@ function selectAnswer(btn, q) {
 function onTimeout(q) {
   if (gameState.answered) return;
   gameState.answered = true;
+  SoundEngine.stopTimerSound();
+  SoundEngine.playTimeout();
   document.querySelectorAll('.answer-btn').forEach(b => {
     b.disabled = true;
     if (b.dataset.correct === 'true') b.classList.add('correct');
@@ -254,6 +270,8 @@ function nextQuestion() {
 
 function endSession() {
   clearTimer();
+  SoundEngine.stopTimerSound();
+  SoundEngine.playVictory();
   showToast(`🎉 ¡Sesión terminada! Acumulaste ${gameState.sessionPoints.toLocaleString()} pts`);
   loadLeaderboard();
   goToScreen('screen-leaderboard');
@@ -287,6 +305,8 @@ function startTimer(seconds, onTimeout) {
 
 function clearTimer() {
   if (gameState.timerInterval) { clearInterval(gameState.timerInterval); gameState.timerInterval = null; }
+  // No llamamos stopTimerSound aquí porque clearTimer se usa internamente
+  // — cada llamador decide si para el sonido
 }
 
 // =========================================================
@@ -450,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal-question').addEventListener('click', function(e){
     if(e.target===this) closeModal('modal-question');
   });
+
   // Click sonoro en todos los botones (audio se inicia con primer gesto)
   document.addEventListener('click', (e) => {
     if (e.target.matches('button, .player-chip, .mode-card, .answer-btn')) {
@@ -483,6 +504,5 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => muteBtn.style.transform = '', 150);
     if (isMuted) SoundEngine.stopTimerSound();
   };
-  document.body.appendChild(muteBtn);  
+  document.body.appendChild(muteBtn);
 });
-
