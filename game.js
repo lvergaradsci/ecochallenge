@@ -450,4 +450,39 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal-question').addEventListener('click', function(e){
     if(e.target===this) closeModal('modal-question');
   });
+  // Click sonoro en todos los botones (audio se inicia con primer gesto)
+  document.addEventListener('click', (e) => {
+    if (e.target.matches('button, .player-chip, .mode-card, .answer-btn')) {
+      if (e.target.matches('.answer-btn')) return; // el answer tiene su propio sonido
+      SoundEngine.playClick();
+    }
+  });
+
+  // Botón mute flotante — se inyecta dinámicamente
+  const muteBtn = document.createElement('button');
+  muteBtn.id = 'mute-btn';
+  muteBtn.innerHTML = '🔊';
+  muteBtn.title = 'Silenciar / Activar sonido';
+  muteBtn.style.cssText = `
+    position:fixed; bottom:1rem; right:1rem; z-index:500;
+    width:40px; height:40px; border-radius:50%;
+    background:var(--card,#1e2d40); border:1px solid rgba(255,255,255,0.12);
+    color:#fff; font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .2s, transform .15s;
+    opacity:0.6;
+  `;
+  muteBtn.onmouseenter = () => muteBtn.style.opacity = '1';
+  muteBtn.onmouseleave = () => muteBtn.style.opacity = '0.6';
+  muteBtn.onclick = (e) => {
+    e.stopPropagation();
+    SoundEngine.init();
+    const isMuted = SoundEngine.toggleMute();
+    muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
+    muteBtn.style.transform = 'scale(0.9)';
+    setTimeout(() => muteBtn.style.transform = '', 150);
+    if (isMuted) SoundEngine.stopTimerSound();
+  };
+  document.body.appendChild(muteBtn);  
 });
+
